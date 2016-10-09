@@ -19,6 +19,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Created by Gebruiker on 9-10-2016.
@@ -28,13 +31,14 @@ public class ActivityToDoItems extends Activity{
     private String userInput;
     private String selectedList;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_do_items);
         Intent activityThatCalled = getIntent();
         selectedList = activityThatCalled.getExtras().getString("List item");
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(selectedList, 0);
+
         if (read()!=null){
             items = read().split(",");}
 
@@ -43,7 +47,14 @@ public class ActivityToDoItems extends Activity{
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text = (TextView) view.findViewById(android.R.id.text1);
-                text.setTextColor(Color.BLUE);
+                SharedPreferences pref = getApplicationContext().getSharedPreferences(selectedList, 0);
+                String itemSelected = (String) text.getText();
+
+                text.setTextColor(Color.DKGRAY);
+
+                if (Arrays.asList(reader(pref)).contains(itemSelected)){
+                text.setTextColor(Color.LTGRAY);}
+
                 return view;
             }};
 
@@ -58,19 +69,36 @@ public class ActivityToDoItems extends Activity{
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 TextView tv = (TextView)view.findViewById(android.R.id.text1);
+                SharedPreferences pref = getApplicationContext().getSharedPreferences(selectedList, 0);
+                SharedPreferences.Editor editor = pref.edit();
+                //getstringview
+                String itemSelected = String.valueOf(adapterView.getItemAtPosition(position));
+
                 if(tv.getCurrentTextColor()==Color.LTGRAY){
-                tv.setTextColor(Color.DKGRAY);}
+                    tv.setTextColor(Color.DKGRAY);
+                    editor.remove(itemSelected);
+                    }
+
                 else{
+                    editor.putString(itemSelected, itemSelected);
                     tv.setTextColor(Color.LTGRAY);
+
                 }
-
-
-
+                editor.commit();
             }
         });
     }
 
+    public String[] reader(SharedPreferences pref){
+        ArrayList<String> list = new ArrayList<String>();
+        Map<String, ?> allEntries = pref.getAll();
 
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            list.add(entry.getValue().toString());}
+        String[] arr = list.toArray(new String[list.size()]);
+
+        return arr;
+    }
 
     public String getUserInput(){
 
@@ -85,7 +113,7 @@ public class ActivityToDoItems extends Activity{
             String story = read();
             FileOutputStream fileout = openFileOutput(selectedList + "unchecked.txt", MODE_PRIVATE);
             OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
-            if (story != null) {
+            if (story != "") {
                 outputWriter.write(story + "," + userInput);
             } else {
                 outputWriter.write(userInput);
@@ -100,7 +128,6 @@ public class ActivityToDoItems extends Activity{
             e.printStackTrace();
         }
     }
-
 
     public String read() {
         //reading text from file

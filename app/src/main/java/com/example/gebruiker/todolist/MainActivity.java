@@ -9,31 +9,56 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
     static final int READ_BLOCK_SIZE = 100;
-    private String list;
-    String[] lists = {};
     private String userInput;
+    private ListView theListView;
+    private ListAdapter theAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (read()!=null){
-        lists = read().split(",");}
-        TextView txt = (TextView)findViewById(R.id.title);
-        ListAdapter theAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, lists);
-        ListView theListView = (ListView)findViewById(R.id.theListView);
-        theListView.setAdapter(theAdapter);
-        //The on click method that uses an intent to see more info about a particular movie
+        viewAll();
+
+
+        }
+
+    public void viewAll() {
+        String[] list;
+        String story = read();
+        list = story.split(",");
+
+            theAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
+            theListView = (ListView) findViewById(R.id.theListView);
+            theListView.setAdapter(theAdapter);
+            clickDeleteList();
+            clickStartActivity();
+
+    }
+
+    public void clickDeleteList(){
+        theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                String listSelected = String.valueOf(adapterView.getItemAtPosition(position));
+                deleteList(listSelected);
+                return true;
+            }
+        });
+    }
+    public void clickStartActivity(){
         theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -47,38 +72,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     //gets user input from edittext
-    public String getUserInput(){
-
-        EditText inputText = (EditText) findViewById((R.id.userInput));
-        return   userInput = inputText.getText().toString();
-    };
-
-    // write text to file
-    public void WriteBtn(View v) {
-        // add-write text into file
-        userInput = getUserInput();
-        try {
-            String story = read();
-            FileOutputStream fileout = openFileOutput("lists.txt", MODE_PRIVATE);
-            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
-            if (story!=null){
-                outputWriter.write(story + "," + userInput);}
-            else{
-                outputWriter.write(userInput);
-            }
-            outputWriter.close();
-
-            //display file saved message
-            Toast.makeText(getBaseContext(), "File saved successfully!",
-                    Toast.LENGTH_SHORT).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // Read text from file
     public String read() {
+        String list = "";
         //reading text from file
         //http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
         try {
@@ -87,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
             //change reading
             char[] inputBuffer = new char[READ_BLOCK_SIZE];
-            list = "";
+
             int charRead;
 
             while ((charRead = InputRead.read(inputBuffer)) > 0) {
@@ -103,4 +99,63 @@ public class MainActivity extends AppCompatActivity {
         }
         return list;
     }
+
+    public String getUserInput() {
+
+        EditText inputText = (EditText) findViewById((R.id.userInput));
+        userInput = inputText.getText().toString();
+        inputText.setText("");
+        return userInput;
+    }
+    public void deleteList(String listSelected){
+        try {
+            String story = read();
+            FileOutputStream fileout = openFileOutput("lists.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+            story = story.replace(","+listSelected, "");
+            story = story.replace(listSelected, "");
+            outputWriter.write(story);
+            outputWriter.close();
+            Toast.makeText(getBaseContext(), story,
+                    Toast.LENGTH_SHORT).show();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+    // write text to file
+    public void WriteBtn(View v) {
+        // add-write text into file
+        userInput = getUserInput();
+        try {
+            String story = read();
+            FileOutputStream fileout = openFileOutput("lists.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+            if (story != "") {
+                outputWriter.write(story + "," + userInput);
+                outputWriter.close();
+            } else {
+                outputWriter.write(userInput);
+                outputWriter.close();
+            }
+            outputWriter.close();Toast.makeText(getBaseContext(), read(),
+                    Toast.LENGTH_SHORT).show();
+
+            //display file saved message
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
+
 }
