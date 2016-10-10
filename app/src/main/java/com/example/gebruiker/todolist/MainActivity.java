@@ -17,35 +17,57 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     static final int READ_BLOCK_SIZE = 100;
     private String userInput;
     private ListView theListView;
     private ListAdapter theAdapter;
+    private EditText editText;
 
-
+//source: http://www.journaldev.com/9383/android-internal-storage-example-tutorial
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        editText = (EditText)findViewById(R.id.userInput);
+
+        if (savedInstanceState != null){
+            String input = (String)savedInstanceState.getString("user input");
+            editText.setText(input);
+        }
+
+
         viewAll();
 
 
         }
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String userInput = editText.getText().toString();
+
+        outState.putString("user input", userInput);
+    }
 
     public void viewAll() {
         String[] list;
         String story = read();
         list = story.split(",");
-
+        if (read()!="") {
             theAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
+        }
+        else{
+            ArrayList<String>emptylist = new ArrayList<String>();
+            theAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, emptylist);
+        }
             theListView = (ListView) findViewById(R.id.theListView);
             theListView.setAdapter(theAdapter);
             clickDeleteList();
             clickStartActivity();
+        }
 
-    }
+
 
     public void clickDeleteList(){
         theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -102,12 +124,13 @@ public class MainActivity extends AppCompatActivity {
 
     public String getUserInput() {
 
-        EditText inputText = (EditText) findViewById((R.id.userInput));
-        userInput = inputText.getText().toString();
-        inputText.setText("");
+        userInput = editText.getText().toString();
+        editText.setText("");
         return userInput;
     }
+
     public void deleteList(String listSelected){
+        //still need to delete shared preferences and text files
         try {
             String story = read();
             FileOutputStream fileout = openFileOutput("lists.txt", MODE_PRIVATE);
@@ -116,13 +139,14 @@ public class MainActivity extends AppCompatActivity {
             story = story.replace(listSelected, "");
             outputWriter.write(story);
             outputWriter.close();
-            Toast.makeText(getBaseContext(), story,
-                    Toast.LENGTH_SHORT).show();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Toast.makeText(getBaseContext(), "To Do List deleted",
+                Toast.LENGTH_SHORT).show();
+        viewAll();
 
 
 
@@ -142,7 +166,8 @@ public class MainActivity extends AppCompatActivity {
                 outputWriter.write(userInput);
                 outputWriter.close();
             }
-            outputWriter.close();Toast.makeText(getBaseContext(), read(),
+            outputWriter.close();
+            Toast.makeText(getBaseContext(), "To Do List added",
                     Toast.LENGTH_SHORT).show();
 
             //display file saved message
@@ -151,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        viewAll();
     }
 
 

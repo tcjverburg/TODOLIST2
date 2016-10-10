@@ -16,7 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -30,19 +32,43 @@ public class ActivityToDoItems extends Activity{
     private String[] items = {};
     private String userInput;
     private String selectedList;
+    private ListAdapter theAdapter;
+    private ListView theListView;
+    private EditText editText;
 
-
+//source:http://www.journaldev.com/9383/android-internal-storage-example-tutorial
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_do_items);
         Intent activityThatCalled = getIntent();
         selectedList = activityThatCalled.getExtras().getString("List item");
+        editText = (EditText)findViewById(R.id.userInputItem);
+        if (savedInstanceState != null){
+            String input = (String)savedInstanceState.getString("user input");
+            editText.setText(input);
+        }
+        showAll();
+    }
 
+    public void showAll(){
         if (read()!=null){
             items = read().split(",");}
+        adapter();
 
-        ListAdapter theAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items) {
+        theListView = (ListView)findViewById(R.id.theListItemView);
+        theListView.setAdapter(theAdapter);
+
+        TextView textView = (TextView)findViewById(R.id.title2);
+        textView.setText(selectedList);
+
+        colorTextChange();
+        clickDeleteList();
+    }
+
+    public void adapter(){
+        items = read().split(",");
+        theAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -53,18 +79,15 @@ public class ActivityToDoItems extends Activity{
                 text.setTextColor(Color.DKGRAY);
 
                 if (Arrays.asList(reader(pref)).contains(itemSelected)){
-                text.setTextColor(Color.LTGRAY);}
+                    text.setTextColor(Color.LTGRAY);}
 
                 return view;
             }};
 
-        final ListView theListView = (ListView)findViewById(R.id.theListItemView);
-        theListView.setAdapter(theAdapter);
+    }
 
-        TextView textView = (TextView)findViewById(R.id.title2);
-        textView.setText(selectedList);
-
-
+    public void colorTextChange(){
+        theListView = (ListView)findViewById(R.id.theListItemView);
         theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -77,7 +100,7 @@ public class ActivityToDoItems extends Activity{
                 if(tv.getCurrentTextColor()==Color.LTGRAY){
                     tv.setTextColor(Color.DKGRAY);
                     editor.remove(itemSelected);
-                    }
+                }
 
                 else{
                     editor.putString(itemSelected, itemSelected);
@@ -101,12 +124,13 @@ public class ActivityToDoItems extends Activity{
     }
 
     public String getUserInput(){
-
-        EditText inputText = (EditText) findViewById((R.id.userInputItem));
-        return   userInput = inputText.getText().toString();
+        String userInput = editText.getText().toString();
+        editText.setText("");
+        return   userInput;
     };
 
-    public void AddItemButton(View v) {
+    public void AddItemButton(View v)
+    {
         // add-write text into file
         userInput = getUserInput();
         try {
@@ -121,17 +145,17 @@ public class ActivityToDoItems extends Activity{
             outputWriter.close();
 
             //display file saved message
-            Toast.makeText(getBaseContext(), "File saved successfully!",
+            Toast.makeText(getBaseContext(), "To Do Item added!",
                     Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        showAll();
     }
 
     public String read() {
         //reading text from file
-        //http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
         String list = "";
         try {
             FileInputStream fileIn = openFileInput(selectedList+"unchecked.txt");
@@ -155,4 +179,48 @@ public class ActivityToDoItems extends Activity{
         }
         return list;
     }
+
+    public void deleteItem(String itemSelected){
+        //still need to delete shared preferences and text files
+        try {
+            String story = read();
+            FileOutputStream fileout = openFileOutput(selectedList + "unchecked.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+            story = story.replace(","+itemSelected, "");
+            story = story.replace(itemSelected, "");
+            outputWriter.write(story);
+            outputWriter.close();
+            Toast.makeText(getBaseContext(), "To Do Item deleted",
+                    Toast.LENGTH_SHORT).show();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        showAll();
+    }
+
+    public void clickDeleteList(){
+        theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                String itemSelected = String.valueOf(adapterView.getItemAtPosition(position));
+                deleteItem(itemSelected);
+                return true;
+            }
+        });
+    }
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String userInput = editText.getText().toString();
+        outState.putSerializable("user input", userInput);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
 }
+
