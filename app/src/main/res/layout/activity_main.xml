@@ -12,7 +12,24 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <fragment android:name="com.example.gebruiker.todolist.Title"
+        android:id="@+id/headlines_fragment"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+
+
 
 
         <EditText
@@ -25,15 +42,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btnHit"
-            android:onClick="WriteBtn"
-            android:text="Add"
+            android:onClick="Btn"
+            android:text="Add List"
             android:layout_marginBottom="5dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/title"
-            android:text="To Do List:"
+            android:text="To Do Lists:"
             android:textSize="25sp" />
 
         <ListView
