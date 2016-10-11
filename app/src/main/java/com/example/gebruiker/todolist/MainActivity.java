@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
         viewAll();
         editText.setText("");
     }
+
 //Loads in the list into the adapter to show the listview
     public void viewAll(){
         theAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, allLists);
@@ -60,6 +61,7 @@ public class MainActivity extends Activity {
         clickDeleteList();
         clickStartActivity();
     }
+
 //Button method which adds new list
     public void Btn(View v) {
         String listTitle = editText.getText().toString();
@@ -70,6 +72,7 @@ public class MainActivity extends Activity {
         viewAll();
         editText.setText("");
     }
+
 //Clickmethod for deleting a list
     public void clickDeleteList() {
         theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -83,20 +86,21 @@ public class MainActivity extends Activity {
             }
         });
     }
+
 //Clickmethod for starting new activity after selecting a list
     public void clickStartActivity(){
         theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
                 String listPicked = String.valueOf(adapterView.getItemAtPosition(position));
-
                 Intent getNameScreen = new Intent(getApplicationContext(), ActivityToDoItems.class);
                 getNameScreen.putExtra("List item", listPicked);
                 startActivity(getNameScreen);
             }
         });
     }
+
 //Saving the list of lists in a textfile.
     protected void save() {
         try {
@@ -116,6 +120,7 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
+
 //Reads the lists out of textfile.
     public String read() {
         String list = "";
@@ -136,6 +141,7 @@ public class MainActivity extends Activity {
         }
         return list;
     }
+
 //saves the list of lists onDestroy()
     @Override
     protected void onDestroy() {

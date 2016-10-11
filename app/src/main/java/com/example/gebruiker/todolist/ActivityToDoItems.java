@@ -45,8 +45,8 @@ public class ActivityToDoItems extends Activity{
     private SharedPreferences.Editor editor;
     private TextView textView;
 
-
     //source:http://www.journaldev.com/9383/android-internal-storage-example-tutorial
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +75,7 @@ public class ActivityToDoItems extends Activity{
         colorTextChange();
         clickDeleteItem();
     }
+
 //Sets adapter for the listview of items.
     public void adapter(){
         theAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, itemlist) {
@@ -91,6 +92,7 @@ public class ActivityToDoItems extends Activity{
             }};
         theListView.setAdapter(theAdapter);
     }
+
 //Changes color of text in the selected textview.
     public void colorTextChange(){
         theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -119,11 +121,13 @@ public class ActivityToDoItems extends Activity{
             }
         });
     }
+
 //Returns a Map<String, ?> with items and the checked/unchecked boolean value.
     public Map<String, ?> reader(SharedPreferences pref){
         Map<String, ?> allEntries = pref.getAll();
         return allEntries;
     }
+
 //The button for adding new items.
     public void AddItemButton(View v){
         String listItem = editText.getText().toString();
@@ -133,6 +137,7 @@ public class ActivityToDoItems extends Activity{
         adapter();
         editText.setText("");
     }
+
 //Saves the list of items of the selected list.
     protected void save() {
         try {
@@ -152,6 +157,7 @@ public class ActivityToDoItems extends Activity{
             e.printStackTrace();
         }
     }
+
 //Reads the textfile and gets the items.
     public String read() {
         String list = "";
@@ -172,6 +178,7 @@ public class ActivityToDoItems extends Activity{
         }
         return list;
     }
+
 //Onclick method for deleting the specific item.
     public void clickDeleteItem() {
         theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -185,6 +192,7 @@ public class ActivityToDoItems extends Activity{
             }
         });
     }
+    
 //Saves list of items onDestroy().
     @Override
     protected void onDestroy() {
