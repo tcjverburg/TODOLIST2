@@ -149,7 +149,7 @@ public class ActivityToDoItems extends Activity{
                 else{
                     savingList += ","+list;}
             }
-            FileOutputStream fileout = openFileOutput("items.txt", MODE_PRIVATE);
+            FileOutputStream fileout = openFileOutput(selectedList+"items.txt", MODE_PRIVATE);
             OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
             outputWriter.write(savingList);
             outputWriter.close();
@@ -163,7 +163,7 @@ public class ActivityToDoItems extends Activity{
         String list = "";
         //reading text from file
         try {
-            FileInputStream fileIn = openFileInput("items.txt");
+            FileInputStream fileIn = openFileInput(selectedList+"items.txt");
             InputStreamReader InputRead = new InputStreamReader(fileIn);
             char[] inputBuffer = new char[100];
             int charRead;
@@ -192,7 +192,7 @@ public class ActivityToDoItems extends Activity{
             }
         });
     }
-    
+
 //Saves list of items onDestroy().
     @Override
     protected void onDestroy() {
