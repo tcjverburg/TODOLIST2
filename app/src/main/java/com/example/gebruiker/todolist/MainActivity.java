@@ -142,13 +142,12 @@ public class MainActivity extends Activity {
         return list;
     }
 
-//saves the list of lists onDestroy()
+    //Saves list of items onStop().
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         save();
     }
-
 }
 
 

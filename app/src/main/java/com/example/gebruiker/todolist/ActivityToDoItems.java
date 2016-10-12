@@ -193,10 +193,10 @@ public class ActivityToDoItems extends Activity{
         });
     }
 
-//Saves list of items onDestroy().
+//Saves list of items onStop().
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         save();
     }
 }
